@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <link rel="stylesheet" href="css/style.css">
+  <meta charset="UTF-8">
+  <title>Controle de Estoque</title>
+</head>
+
+<body>
+
+<h1>📦 Controle de Estoque</h1>
+
+
+<h2>Adicionar Produto</h2>
+
+<input id="nome" placeholder="Nome do produto">
+<input id="preco" placeholder="Preço">
+<button onclick="addProduto()">Cadastrar</button>
+
+<hr>
+
+<h2>Lista de Produtos</h2>
+<ul id="lista"></ul>
+
+<hr>
+
+
+<h2>Entrada de Produto</h2>
+
+<input id="idEntrada" placeholder="ID Produto">
+<input id="qtdEntrada" placeholder="Quantidade">
+<button onclick="entrada()">Registrar Entrada</button>
+
+<hr>
+
+<h2>Saída de Produto</h2>
+
+<input id="idSaida" placeholder="ID Produto">
+<input id="qtdSaida" placeholder="Quantidade">
+<button onclick="saida()">Registrar Saída</button>
+
+<script>
+
+const API = "http://localhost:3000";
+
+
+function addProduto() {
+  fetch(API + "/produtos", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({
+      nome: nome.value,
+      preco: preco.value
+    })
+  }).then(() => {
+    nome.value = "";
+    preco.value = "";
+    listar();
+  });
+}
+
+function listar() {
+  fetch(API + "/produtos")
+    .then(res => res.json())
+    .then(produtos => {
+      lista.innerHTML = "";
+
+      produtos.forEach(p => {
+        lista.innerHTML += `
+          <li>
+            ID: ${p.id} | ${p.nome} | R$ ${p.preco} | Estoque: ${p.estoque}
+            <button onclick="deletar(${p.id})">❌</button>
+          </li>
+        `;
+      });
+    });
+}
+
+function deletar(id) {
+  fetch(API + "/produtos/" + id, {
+    method: "DELETE"
+  }).then(() => listar());
+}
+
+
+function entrada() {
+  fetch(API + "/entradas", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({
+      id_produto: idEntrada.value,
+      quantidade: qtdEntrada.value
+    })
+  }).then(() => {
+    idEntrada.value = "";
+    qtdEntrada.value = "";
+    listar();
+  });
+}
+
+
+function saida() {
+  fetch(API + "/saidas", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({
+      id_produto: idSaida.value,
+      quantidade: qtdSaida.value
+    })
+  }).then(() => {
+    idSaida.value = "";
+    qtdSaida.value = "";
+    listar();
+  });
+}
+
+
+listar();
+
+</script>
+
+</body>
+</html>
